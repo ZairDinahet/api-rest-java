@@ -1,9 +1,11 @@
 package com.apirest.api_rest_java.controllers;
 
-import com.apirest.api_rest_java.models.entities.Employee;
-import com.apirest.api_rest_java.repositories.EmployeeRepository;
-import org.jetbrains.annotations.NotNull;
+import com.apirest.api_rest_java.models.dtos.EmployeeDTO;
+import com.apirest.api_rest_java.services.EmployeeService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -14,42 +16,41 @@ import java.util.List;
 public class EmployeeController {
 
     @Autowired
-    private EmployeeRepository employeeRepository;
+    private EmployeeService employeeService;
 
     @GetMapping
-    public List<Employee> getAllEmployees() {
-        return employeeRepository.findAll();
+    public ResponseEntity<List<EmployeeDTO>> getAllEmployees() {
+        List<EmployeeDTO> employees = employeeService.getAllEmployees();
+        return ResponseEntity.ok(employees);
     }
 
     @GetMapping("/{id}")
-    public Employee getEmployeeById(@PathVariable Long id) {
-        return employeeRepository.findById(id).orElseThrow(() -> new RuntimeException("Employee with Id " + id + " not found"));
+    public ResponseEntity<EmployeeDTO> getEmployeeById(@PathVariable Long id) {
+        EmployeeDTO employee = employeeService.getEmployeeById(id);
+        return ResponseEntity.ok(employee);
+    }
+
+    @GetMapping("/company/{id}")
+    public ResponseEntity<List<EmployeeDTO>> getEmployeesByCompanyId(@PathVariable Long id) {
+        List<EmployeeDTO> employees = employeeService.getEmployeesByCompanyId(id);
+        return ResponseEntity.ok(employees);
     }
 
     @PostMapping
-    public Employee createEmployee(@RequestBody Employee employee) {
-        return employeeRepository.save(employee);
+    public ResponseEntity<EmployeeDTO> createEmployee(@RequestBody EmployeeDTO employeeDTO) {
+        EmployeeDTO createdEmployee = employeeService.saveEmployee(employeeDTO);
+        return  ResponseEntity.status(HttpStatus.CREATED).body(createdEmployee);
     }
 
     @PutMapping("/{id}")
-    public Employee updateEmployee(@PathVariable Long id, @RequestBody @NotNull Employee employee) {
-        Employee employeeFound = employeeRepository.findById(id).orElseThrow(() -> new RuntimeException("Employee with Id " + id + " not found"));
-
-        employeeFound.setName(employee.getName());
-        employeeFound.setLastName(employee.getLastName());
-        employeeFound.setPosition(employee.getPosition());
-        employeeFound.setEmail(employee.getEmail());
-        employeeFound.setAddress(employee.getAddress());
-        employeeFound.setPhone(employee.getPhone());
-
-        return employeeRepository.save(employeeFound);
+    public ResponseEntity<EmployeeDTO> updateEmployee(@PathVariable Long id, @RequestBody EmployeeDTO employeeDTO) {
+        EmployeeDTO updatedEmployee = employeeService.updateEmployee(id, employeeDTO);
+        return ResponseEntity.ok(updatedEmployee);
     }
 
     @DeleteMapping("/{id}")
-    public String deleteEmployee(@PathVariable Long id) {
-        Employee employeeFound = employeeRepository.findById(id).orElseThrow(() -> new RuntimeException("Employee with Id " + id + " not found"));
-
-        employeeRepository.delete(employeeFound);
-        return "Employee with Id " + id + " deleted";
+    public ResponseEntity<Void> deleteEmployee(@PathVariable Long id) {
+        employeeService.deleteEmployeeById(id);
+        return ResponseEntity.noContent().build();
     }
 }
