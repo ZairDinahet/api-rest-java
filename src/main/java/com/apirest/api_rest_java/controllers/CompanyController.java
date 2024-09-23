@@ -1,9 +1,11 @@
 package com.apirest.api_rest_java.controllers;
 
-import com.apirest.api_rest_java.models.entities.Company;
-import com.apirest.api_rest_java.models.entities.Employee;
-import com.apirest.api_rest_java.repositories.CompanyRepository;
+import com.apirest.api_rest_java.models.dtos.CompanyDTO;
+import com.apirest.api_rest_java.services.CompanyService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -14,42 +16,36 @@ import java.util.List;
 public class CompanyController {
 
     @Autowired
-    private CompanyRepository companyRepository;
+    private CompanyService companyService;
 
     @GetMapping
-    public List<Company> getAllCompanies() {
-        return companyRepository.findAll();
+    public ResponseEntity<List<CompanyDTO>> getAllCompanies() {
+        List<CompanyDTO> companies = companyService.getAllCompanies();
+        return ResponseEntity.ok(companies);
     }
 
     @GetMapping("/{id}")
-    public Company getCompanyById(@PathVariable Long id) {
-        return companyRepository.findById(id).orElseThrow(() -> new RuntimeException("Company with Id " + id + " not found"));
-    }
-
-    @GetMapping("/{id}/employees")
-    public List<Employee> getCompanyEmployees(@PathVariable Long id) {
-        return companyRepository.findById(id).orElseThrow(() -> new RuntimeException("Company with Id " + id + " not found")).getEmployees();
+    public ResponseEntity<CompanyDTO> getCompanyById(@PathVariable Long id) {
+        CompanyDTO company = companyService.getCompanyById(id);
+        return ResponseEntity.ok(company);
     }
 
     @PostMapping
-    public Company createCompany(@RequestBody Company company) {
-        return companyRepository.save(company);
+    public ResponseEntity<CompanyDTO> createCompany(@Valid @RequestBody CompanyDTO companyDTO) {
+        CompanyDTO createdCompany = companyService.saveCompany(companyDTO);
+        return ResponseEntity.status(HttpStatus.CREATED).body(createdCompany);
     }
 
     @PutMapping("/{id}")
-    public Company updateCompany(@PathVariable Long id, @RequestBody Company company) {
-        Company companyFound = companyRepository.findById(id).orElseThrow(() -> new RuntimeException("Company with Id " + id + " not found"));
-        companyFound.setAddress(company.getAddress());
-        companyFound.setName(company.getName());
-
-        return companyRepository.save(companyFound);
+    public ResponseEntity<CompanyDTO> updateCompany(@PathVariable Long id, @Valid @RequestBody CompanyDTO companyDTO) {
+        CompanyDTO updatedCompany = companyService.updateCompany(id, companyDTO);
+        return ResponseEntity.ok(updatedCompany);
     }
 
     @DeleteMapping("/{id}")
-    public String deleteCompany(@PathVariable Long id) {
-        Company companyFound = companyRepository.findById(id).orElseThrow(() -> new RuntimeException("Company with Id " + id + " not found"));
-
-        companyRepository.delete(companyFound);
-        return "Company with Id " + id + " deleted";
+    public ResponseEntity<Void> deleteCompany(@PathVariable Long id) {
+        companyService.deleteCompanyById(id);
+        return ResponseEntity.noContent().build();
     }
 }
+
