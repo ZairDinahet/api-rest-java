@@ -3,20 +3,19 @@ package com.apirest.api_rest_java.controllers;
 import com.apirest.api_rest_java.models.dtos.CompanyDTO;
 import com.apirest.api_rest_java.services.CompanyService;
 import jakarta.validation.Valid;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-
+@RequiredArgsConstructor
 @RestController
 @RequestMapping("/api/v1/companies")
 public class CompanyController {
 
-    @Autowired
-    private CompanyService companyService;
+    private final CompanyService companyService;
 
     @GetMapping
     public ResponseEntity<List<CompanyDTO>> getAllCompanies() {
