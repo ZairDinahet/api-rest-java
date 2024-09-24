@@ -5,21 +5,19 @@ import com.apirest.api_rest_java.mappers.CompanyMapper;
 import com.apirest.api_rest_java.models.dtos.CompanyDTO;
 import com.apirest.api_rest_java.models.entities.Company;
 import com.apirest.api_rest_java.repositories.CompanyRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
+@RequiredArgsConstructor
 @Service
 public class CompanyServiceImp implements CompanyService {
 
-    @Autowired
-    private CompanyRepository companyRepository;
-
-    @Autowired
-    private CompanyMapper companyMapper;
+    private final CompanyRepository companyRepository;
+    private final CompanyMapper companyMapper;
 
     @Override
     public List<CompanyDTO> getAllCompanies() {
